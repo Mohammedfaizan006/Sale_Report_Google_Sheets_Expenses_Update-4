@@ -1,0 +1,11 @@
+{
+  "name": "Sale Report",
+  "short_name": "Sale Report",
+  "description": "Record daily sales and view monthly reports.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fff9e8",
+  "theme_color": "#6b260d",
+  "orientation": "portrait",
+  "icons": []
+}

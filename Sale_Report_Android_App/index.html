@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#6b260d">
+<meta name="description" content="Sale Report daily sales tracker">
+<link rel="manifest" href="manifest.json">
+<title>Sale Report Sales</title>
+<style>
+:root{--brown:#6b260d;--brown2:#8b3410;--yellow:#fff36a;--cream:#fffdf0;--orange:#f4a261;--ink:#351608;--muted:#78685f;--line:#eadcc9;--green:#217346}
+*{box-sizing:border-box}body{margin:0;background:#fff9e8;color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding-bottom:calc(78px + env(safe-area-inset-bottom))}
+header{background:var(--brown);color:white;padding:20px 18px 17px;border-radius:0 0 22px 22px;box-shadow:0 5px 16px #6b260d22}
+.brand{font-size:12px;letter-spacing:2px;text-transform:uppercase;opacity:.85}.headrow{display:flex;align-items:center;justify-content:space-between;gap:10px}.headrow h1{font-size:24px;margin:4px 0 0}.date-pill{background:#ffffff20;border:1px solid #ffffff55;border-radius:20px;padding:7px 10px;font-size:12px;white-space:nowrap}
+main{max-width:760px;margin:auto;padding:15px}.tab{display:none}.tab.active{display:block}.section-title{font-size:18px;margin:7px 0 12px}.muted{color:var(--muted);font-size:13px}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metric{background:white;border:1px solid var(--line);border-radius:15px;padding:14px;box-shadow:0 3px 10px #54240b08}.metric .label{font-size:12px;color:var(--muted)}.metric .value{font-size:23px;font-weight:800;margin-top:5px;color:var(--brown);overflow-wrap:anywhere}
+.product-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.product{background:white;border:1px solid var(--line);border-radius:15px;padding:13px;text-align:left;min-height:100px;display:flex;flex-direction:column;justify-content:space-between;color:var(--ink);box-shadow:0 3px 10px #54240b08}.product:active{transform:scale(.98);background:#fff7c7}.product .pname{font-weight:750;font-size:14px;line-height:1.25}.product .price{color:var(--brown);font-weight:800;font-size:18px;margin-top:10px}.addhint{font-size:11px;color:var(--muted);margin-top:3px}
+.panel{background:white;border:1px solid var(--line);border-radius:15px;padding:14px;margin:12px 0}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.btn{border:0;border-radius:12px;background:var(--brown);color:white;font-weight:750;padding:12px 15px;font-size:14px;cursor:pointer}.btn.secondary{background:#f5e5d2;color:var(--brown)}.btn.green{background:var(--green)}.btn.danger{background:#a12b20}.btn.full{width:100%}
+input,select{width:100%;border:1px solid #d9c5b1;border-radius:10px;padding:11px;font:inherit;background:white;color:var(--ink)}label{display:block;font-size:12px;color:var(--muted);margin:10px 0 5px}.fieldgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+table{border-collapse:collapse;width:100%;font-size:13px}th,td{text-align:left;padding:10px 7px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-size:11px;text-transform:uppercase}td.num,th.num{text-align:right}.empty{padding:20px;text-align:center;color:var(--muted);font-size:14px}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fffdf7;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 4px calc(8px + env(safe-area-inset-bottom));z-index:10}nav button{background:none;border:0;color:#806d60;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:55px;padding:5px}nav button span{font-size:20px}nav button.active{color:var(--brown);font-weight:800}
+.listitem{padding:11px 0;border-bottom:1px solid var(--line)}.listitem:last-child{border-bottom:0}.badge{font-size:11px;background:#fff1b0;color:var(--brown);padding:4px 7px;border-radius:9px;font-weight:750}
+.barline{height:9px;background:#f4e6d3;border-radius:9px;overflow:hidden;margin-top:6px}.barline div{height:100%;background:var(--orange);border-radius:9px}
+small.note{display:block;color:var(--muted);line-height:1.45;margin-top:10px}
+@media(min-width:600px){.product-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.cards{grid-template-columns:repeat(4,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<header>
+ <div class="brand">Your daily business companion</div>
+ <div class="headrow"><h1>Sale Report</h1><div class="date-pill" id="todayPill"></div></div>
+</header>
+<main>
+<section id="home" class="tab active">
+ <div class="row"><h2 class="section-title">Today's overview</h2><button class="btn secondary" id="todayReset">Today</button></div>
+ <div class="cards">
+  <div class="metric"><div class="label">Today's revenue</div><div class="value" id="todayRevenue">₹0</div></div>
+  <div class="metric"><div class="label">Items sold</div><div class="value" id="todayQty">0</div></div>
+  <div class="metric"><div class="label">Sales entries</div><div class="value" id="todayEntries">0</div></div>
+  <div class="metric"><div class="label">Top item today</div><div class="value" style="font-size:15px" id="todayTop">—</div></div>
+ </div>
+ <h2 class="section-title" style="margin-top:22px">Tap a product to record a sale</h2>
+ <div class="product-grid" id="productGrid"></div>
+ <div class="panel"><div class="row"><div><b>Recent sales</b><div class="muted">Latest entries recorded on this device</div></div><button class="btn secondary" onclick="showTab('sales')">View all</button></div><div id="recentSales"></div></div>
+</section>
+<section id="sales" class="tab">
+ <h2 class="section-title">Sales history</h2>
+ <div class="panel"><div class="fieldgrid"><div><label for="salesDateFilter">Filter by date</label><input type="date" id="salesDateFilter"></div><div><label for="salesProductFilter">Product</label><select id="salesProductFilter"><option value="">All products</option></select></div></div><div class="row" style="margin-top:12px"><div><div class="muted">Filtered revenue</div><b id="filteredRevenue">₹0</b></div><button class="btn secondary" id="clearFilters">Clear filters</button></div></div>
+ <div class="panel" style="overflow:auto"><table><thead><tr><th>Date</th><th>Product</th><th class="num">Qty</th><th class="num">Total</th><th></th></tr></thead><tbody id="salesTable"></tbody></table><div id="salesEmpty" class="empty" hidden>No sales match these filters.</div></div>
+ <button class="btn green full" id="exportBtn">Export sales to Excel-compatible CSV</button>
+ <small class="note">CSV opens in Excel or Google Sheets. Keep a backup by exporting regularly.</small>
+</section>
+<section id="monthly" class="tab">
+ <h2 class="section-title">Monthly dashboard</h2>
+ <div class="panel"><label for="monthPicker">Choose month</label><input type="month" id="monthPicker"></div>
+ <div class="cards">
+  <div class="metric"><div class="label">Revenue</div><div class="value" id="monthRevenue">₹0</div></div>
+  <div class="metric"><div class="label">Items sold</div><div class="value" id="monthQty">0</div></div>
+  <div class="metric"><div class="label">Sales entries</div><div class="value" id="monthEntries">0</div></div>
+  <div class="metric"><div class="label">Best seller</div><div class="value" style="font-size:15px" id="monthTop">—</div></div>
+  <div class="metric"><div class="label">Expenses</div><div class="value" id="monthExpenses">₹0</div></div>
+  <div class="metric"><div class="label">Sales − expenses</div><div class="value" id="monthNet">₹0</div></div>
+ </div>
+ <div class="panel"><b>Product performance</b><div class="muted">Ranked by quantity sold</div><div id="productPerformance"></div></div>
+ <div class="panel"><b>Daily revenue</b><div id="dailyPerformance"></div></div>
+</section>
+<section id="expenses" class="tab">
+ <h2 class="section-title">Expenses</h2>
+ <div class="panel"><form id="expenseForm"><label for="expenseDate">Date</label><input type="date" id="expenseDate" required><div class="fieldgrid"><div><label for="expenseAmount">Amount (₹)</label><input type="number" id="expenseAmount" min="0.01" step="0.01" required placeholder="e.g. 250"></div><div><label for="expenseCategory">Category</label><select id="expenseCategory"><option>Ingredients</option><option>Packaging</option><option>Transport</option><option>Rent</option><option>Utilities</option><option>Staff</option><option>Other</option></select></div></div><label for="expenseDescription">Description</label><input id="expenseDescription" maxlength="160" placeholder="e.g. potatoes, curd, oil"><button class="btn full" style="margin-top:14px" type="submit">Save expense</button></form></div>
+ <div class="cards"><div class="metric"><div class="label">Today's expenses</div><div class="value" id="todayExpenses">₹0</div></div><div class="metric"><div class="label">Today's net</div><div class="value" id="todayNet">₹0</div></div></div>
+ <div class="panel"><div class="row"><b>Expense history</b><button class="btn secondary" id="exportExpenses">Export CSV</button></div><div class="fieldgrid"><div><label for="expenseFilterMonth">Filter month</label><input type="month" id="expenseFilterMonth"></div><div><label for="expenseFilterDate">Filter date</label><input type="date" id="expenseFilterDate"></div></div><div id="expenseList"></div></div>
+</section>
+<section id="menu" class="tab">
+ <h2 class="section-title">Menu & prices</h2>
+ <p class="muted">Edit prices here. New sales use the current price; old sales keep their recorded price.</p>
+ <div id="menuEditor"></div>
+ <button class="btn full" id="savePrices">Save menu prices</button>
+ <div class="panel"><b>Google Sheets automatic sync</b><p class="muted">Paste your Apps Script Web App URL ending in <code>/exec</code>. New sales and expenses will be sent when saved and your device is online.</p><label for="syncUrl">Google Apps Script Web App URL</label><input id="syncUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec"><button class="btn full" id="saveSyncUrl" style="margin-top:10px">Save sync settings</button><div class="muted" id="syncStatus" style="margin-top:8px">Sync not configured</div><small class="note">Only new entries are synced automatically. Older entries already on this device are not uploaded. Keep the web app URL private if deployed for anyone to access.</small></div>
+ <div class="panel"><b>Data backup</b><p class="muted">Sales, expenses, and menu prices are stored in this browser on this device. Clearing browser data or uninstalling can remove them.</p><div class="row"><button class="btn secondary" id="backupBtn">Download backup</button><button class="btn danger" id="restoreBtn">Restore backup</button></div><input type="file" id="backupFile" accept=".json,application/json" hidden></div>
+ <small class="note">Sales and expenses stay on this device as well as syncing to Google Sheets when configured and online. Export a backup regularly.</small>
+</section>
+</main>
+<nav>
+ <button class="active" data-tab="home"><span>＋</span>Sell</button>
+ <button data-tab="sales"><span>🧾</span>Sales</button>
+ <button data-tab="expenses"><span>💸</span>Expenses</button>
+ <button data-tab="monthly"><span>📊</span>Reports</button>
+ <button data-tab="menu"><span>⚙️</span>Settings</button>
+</nav>
+<dialog id="saleDialog" style="border:0;border-radius:18px;width:min(92%,420px);padding:20px;color:var(--ink)">
+ <form method="dialog" id="saleForm"><div class="row"><h2 id="dialogProduct" style="font-size:20px;margin:0"></h2><button class="btn secondary" value="cancel" aria-label="Close">✕</button></div>
+ <div class="muted" id="dialogPrice" style="margin-top:5px"></div>
+ <label for="saleDate">Sale date</label><input id="saleDate" type="date" required>
+ <label for="saleQty">Quantity</label><input id="saleQty" type="number" min="1" step="1" value="1" required>
+ <label for="saleNotes">Notes / order reference (optional)</label><input id="saleNotes" maxlength="100" placeholder="e.g. takeaway">
+ <div class="row" style="margin:16px 0"><span>Total</span><b id="dialogTotal" style="font-size:22px;color:var(--brown)">₹0</b></div>
+ <button class="btn full" id="saveSale" value="save">Save sale</button></form>
+</dialog>
+<div id="toast" style="position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#2b211c;color:white;padding:11px 16px;border-radius:12px;display:none;z-index:30;font-size:13px;max-width:90%;text-align:center"></div>
+<script>
+const DEFAULT_PRODUCTS=[
+ {name:"Pani Puri (8 pcs)",price:30},{name:"Dahi Puri (8 pcs)",price:50},{name:"Dahi Papdi",price:50},
+ {name:"Samosa Chat",price:50},{name:"Papdi Chat",price:50},{name:"Cutlet Chat",price:50},
+ {name:"Vada Pav",price:30},{name:"Butter Pav Bhaji",price:100},{name:"Water Bottle",price:10},{name:"Extra Pav",price:0}
+];
+const money=n=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:2}).format(Number(n)||0);
+const isoToday=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+const monthNow=()=>isoToday().slice(0,7);
+let products=load('rc_products',DEFAULT_PRODUCTS),sales=load('rc_sales',[]),expenses=load('rc_expenses',[]),syncUrl=load('rc_sync_url','');
+function load(k,def){try{const v=localStorage.getItem(k);return v?JSON.parse(v):structuredClone(def)}catch(e){return structuredClone(def)}}
+function save(){localStorage.setItem('rc_products',JSON.stringify(products));localStorage.setItem('rc_sales',JSON.stringify(sales));localStorage.setItem('rc_expenses',JSON.stringify(expenses));localStorage.setItem('rc_sync_url',JSON.stringify(syncUrl))}
+async function syncRecord(type,record){if(!syncUrl){return}if(!navigator.onLine){toast('Saved on device; will need internet to sync.');return}try{await fetch(syncUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({type,record})});document.getElementById('syncStatus').textContent='Sync configured. Latest entry sent (response cannot be verified by browser).'}catch(e){document.getElementById('syncStatus').textContent='Could not send. Check internet and Apps Script URL.'}}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',2400)}
+function showTab(id){document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x.dataset.tab===id));if(id==='sales')renderSales();if(id==='monthly')renderMonthly();if(id==='menu')renderMenu();if(id==='expenses')renderExpenses();window.scrollTo(0,0)}
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+document.getElementById('todayPill').textContent=new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+function renderProducts(){document.getElementById('productGrid').innerHTML=products.map((p,i)=>`<button class="product" data-i="${i}"><span class="pname">${esc(p.name)}</span><span><span class="price">${p.price>0?money(p.price):'Set price'}</span><span class="addhint">Tap to add sale</span></span></button>`).join('');document.querySelectorAll('.product').forEach(b=>b.onclick=()=>openSale(Number(b.dataset.i)))}
+let selectedProduct=0;
+function openSale(i){selectedProduct=i;const p=products[i];document.getElementById('dialogProduct').textContent=p.name;document.getElementById('dialogPrice').textContent=p.price>0?`${money(p.price)} per unit`:'Please set a price in Menu first.';document.getElementById('saleDate').value=isoToday();document.getElementById('saleQty').value=1;document.getElementById('saleNotes').value='';updateDialogTotal();document.getElementById('saleDialog').showModal()}
+function updateDialogTotal(){const p=products[selectedProduct];document.getElementById('dialogTotal').textContent=money(p.price*(Number(document.getElementById('saleQty').value)||0))}
+document.getElementById('saleQty').addEventListener('input',updateDialogTotal);
+document.getElementById('saleForm').addEventListener('submit',e=>{e.preventDefault();const p=products[selectedProduct],qty=Number(document.getElementById('saleQty').value),date=document.getElementById('saleDate').value;if(!p.price||p.price<0){toast('Set a valid product price in Menu first.');return}if(!Number.isInteger(qty)||qty<1||!date){toast('Enter a valid date and quantity.');return}const record={id:String(Date.now())+'-'+Math.random().toString(36).slice(2,8),date,product:p.name,qty,unitPrice:Number(p.price),total:qty*Number(p.price),notes:document.getElementById('saleNotes').value.trim()};sales.push(record);save();syncRecord('sale',record);document.getElementById('saleDialog').close();renderAll();toast('Sale saved on device'+(syncUrl?' · syncing':'') )});
+document.getElementById('saleForm').addEventListener('click',e=>{if(e.target.id==='saveSale'){}});
+function todaySales(){return sales.filter(s=>s.date===isoToday())}
+function sum(arr,key){return arr.reduce((a,s)=>a+(Number(s[key])||0),0)}
+function topProduct(arr){const counts={};arr.forEach(s=>counts[s.product]=(counts[s.product]||0)+Number(s.qty));const entries=Object.entries(counts).sort((a,b)=>b[1]-a[1]);return entries.length?{name:entries[0][0],qty:entries[0][1]}:null}
+function renderHome(){const ss=todaySales(),top=topProduct(ss);document.getElementById('todayRevenue').textContent=money(sum(ss,'total'));document.getElementById('todayQty').textContent=sum(ss,'qty');document.getElementById('todayEntries').textContent=ss.length;document.getElementById('todayTop').textContent=top?top.name:'—';const recent=[...ss].reverse().slice(0,5);document.getElementById('recentSales').innerHTML=recent.length?recent.map(s=>`<div class="listitem row"><div><b>${esc(s.product)}</b><div class="muted">${s.qty} × ${money(s.unitPrice)} · ${esc(s.notes||'No note')}</div></div><b>${money(s.total)}</b></div>`).join(''):'<div class="empty">No sales recorded today. Tap a product above to start.</div>'}
+function renderSales(){const date=document.getElementById('salesDateFilter').value,prod=document.getElementById('salesProductFilter').value;const filtered=[...sales].filter(s=>(!date||s.date===date)&&(!prod||s.product===prod)).sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);document.getElementById('filteredRevenue').textContent=money(sum(filtered,'total'));document.getElementById('salesTable').innerHTML=filtered.map(s=>`<tr><td>${esc(s.date)}</td><td>${esc(s.product)}${s.notes?`<div class="muted">${esc(s.notes)}</div>`:''}</td><td class="num">${s.qty}</td><td class="num">${money(s.total)}</td><td><button class="btn danger" style="padding:6px 8px" onclick="deleteSale('${s.id}')">✕</button></td></tr>`).join('');document.getElementById('salesEmpty').hidden=filtered.length>0}
+function deleteSale(id){if(!confirm('Delete this sale entry?'))return;sales=sales.filter(s=>String(s.id)!==String(id));save();renderAll();renderSales();toast('Sale deleted')}
+document.getElementById('salesDateFilter').addEventListener('change',renderSales);document.getElementById('salesProductFilter').addEventListener('change',renderSales);document.getElementById('clearFilters').onclick=()=>{document.getElementById('salesDateFilter').value='';document.getElementById('salesProductFilter').value='';renderSales()};
+function renderMonthly(){const month=document.getElementById('monthPicker').value||monthNow();const ss=sales.filter(s=>s.date.startsWith(month));const monthEx=expenses.filter(e=>e.date.startsWith(month));document.getElementById('monthExpenses').textContent=money(sum(monthEx,'amount'));document.getElementById('monthNet').textContent=money(sum(ss,'total')-sum(monthEx,'amount'));const top=topProduct(ss);document.getElementById('monthRevenue').textContent=money(sum(ss,'total'));document.getElementById('monthQty').textContent=sum(ss,'qty');document.getElementById('monthEntries').textContent=ss.length;document.getElementById('monthTop').textContent=top?`${top.name} (${top.qty})`:'—';const perf=products.map(p=>({name:p.name,qty:ss.filter(s=>s.product===p.name).reduce((a,s)=>a+s.qty,0),revenue:ss.filter(s=>s.product===p.name).reduce((a,s)=>a+s.total,0)})).sort((a,b)=>b.qty-a.qty);const max=Math.max(1,...perf.map(p=>p.qty));document.getElementById('productPerformance').innerHTML=perf.map(p=>`<div class="listitem"><div class="row"><b>${esc(p.name)}</b><span class="badge">${p.qty} sold</span></div><div class="barline"><div style="width:${p.qty/max*100}%"></div></div><div class="muted" style="margin-top:4px">Revenue: ${money(p.revenue)}</div></div>`).join('');const [y,m]=month.split('-').map(Number),days=new Date(y,m,0).getDate(),daily=[];for(let d=1;d<=days;d++){const day=`${month}-${String(d).padStart(2,'0')}`,rev=ss.filter(s=>s.date===day).reduce((a,s)=>a+s.total,0);daily.push({day,rev})}const maxRev=Math.max(1,...daily.map(d=>d.rev));document.getElementById('dailyPerformance').innerHTML=daily.map(d=>`<div style="margin:9px 0"><div class="row"><span>${d.day.slice(8)} ${new Date(y,m-1,Number(d.day.slice(8))).toLocaleDateString('en-IN',{weekday:'short'})}</span><b>${money(d.rev)}</b></div><div class="barline"><div style="width:${d.rev/maxRev*100}%"></div></div></div>`).join('')}
+document.getElementById('monthPicker').value=monthNow();document.getElementById('monthPicker').addEventListener('change',renderMonthly);
+function renderExpenses(){const month=document.getElementById('expenseFilterMonth').value,date=document.getElementById('expenseFilterDate').value;const filtered=expenses.filter(e=>(!month||e.date.startsWith(month))&&(!date||e.date===date)).slice().sort((a,b)=>b.date.localeCompare(a.date)||String(b.id).localeCompare(String(a.id)));document.getElementById('todayExpenses').textContent=money(sum(expenses.filter(e=>e.date===isoToday()),'amount'));document.getElementById('todayNet').textContent=money(sum(todaySales(),'total')-sum(expenses.filter(e=>e.date===isoToday()),'amount'));document.getElementById('expenseList').innerHTML=filtered.length?filtered.map(e=>`<div class="listitem row"><div><b>${money(e.amount)} · ${esc(e.category)}</b><div class="muted">${esc(e.date)}${e.description?' · '+esc(e.description):''}</div></div><button class="btn danger" style="padding:6px 8px" onclick="deleteExpense('${e.id}')">✕</button></div>`).join(''):'<div class="empty">No expenses match these filters.</div>'}
+document.getElementById('expenseDate').value=isoToday();document.getElementById('expenseFilterMonth').value=monthNow();document.getElementById('expenseFilterMonth').addEventListener('change',renderExpenses);document.getElementById('expenseFilterDate').addEventListener('change',renderExpenses);
+document.getElementById('expenseForm').addEventListener('submit',e=>{e.preventDefault();const amount=Number(document.getElementById('expenseAmount').value),date=document.getElementById('expenseDate').value;if(!(amount>0)||!date){toast('Enter a valid expense amount and date.');return}const record={id:String(Date.now())+'-'+Math.random().toString(36).slice(2,8),date,amount,category:document.getElementById('expenseCategory').value,description:document.getElementById('expenseDescription').value.trim()};expenses.push(record);save();syncRecord('expense',record);document.getElementById('expenseAmount').value='';document.getElementById('expenseDescription').value='';renderExpenses();renderMonthly();toast('Expense saved on device'+(syncUrl?' · syncing':''))});
+function deleteExpense(id){if(!confirm('Delete this expense entry? This removes it from this device only; the Google Sheet row is not deleted.'))return;expenses=expenses.filter(e=>String(e.id)!==String(id));save();renderExpenses();renderMonthly();toast('Expense deleted on device')}
+document.getElementById('exportExpenses').onclick=()=>{const rows=[['ID','Date','Amount (INR)','Category','Description'],...expenses.map(e=>[e.id,e.date,e.amount,e.category,e.description||''])];downloadBlob('\ufeff'+rows.map(r=>r.map(csvEscape).join(',')).join('\r\n'),`Sale_Report_Expenses_${isoToday()}.csv`,'text/csv;charset=utf-8')};
+document.getElementById('saveSyncUrl').onclick=()=>{syncUrl=document.getElementById('syncUrl').value.trim();save();document.getElementById('syncStatus').textContent=syncUrl?'Sync URL saved on this device.':'Sync not configured';toast(syncUrl?'Sync settings saved':'Sync disabled')};
+function renderMenu(){document.getElementById('menuEditor').innerHTML=products.map((p,i)=>`<div class="panel" style="margin:8px 0"><div class="row"><b>${esc(p.name)}</b><span style="width:125px"><label style="margin-top:0">Price (₹)</label><input type="number" min="0" step=".5" data-price-i="${i}" value="${p.price}" /></span></div></div>`).join('')}
+document.getElementById('savePrices').onclick=()=>{document.querySelectorAll('[data-price-i]').forEach(el=>{products[Number(el.dataset.priceI)].price=Math.max(0,Number(el.value)||0)});save();renderAll();renderMenu();toast('Menu prices saved')};
+function csvEscape(v){return '"'+String(v??'').replace(/"/g,'""')+'"'}
+document.getElementById('exportBtn').onclick=()=>{const rows=[['Date','Product','Quantity','Unit Price (INR)','Total (INR)','Notes'],...sales.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(s=>[s.date,s.product,s.qty,s.unitPrice,s.total,s.notes||''])];const csv='\ufeff'+rows.map(r=>r.map(csvEscape).join(',')).join('\r\n');downloadBlob(csv,`Sale Reports_Chat_Sales_${isoToday()}.csv`,'text/csv;charset=utf-8');toast('Sales CSV exported')};
+function downloadBlob(content,name,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+document.getElementById('backupBtn').onclick=()=>downloadBlob(JSON.stringify({version:2,products,sales,expenses,syncUrl},null,2),`Sale Reports_Chat_Backup_${isoToday()}.json`,'application/json');
+document.getElementById('restoreBtn').onclick=()=>document.getElementById('backupFile').click();
+document.getElementById('backupFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());if(!Array.isArray(d.products)||!Array.isArray(d.sales))throw Error();if(!confirm('Restore this backup? Current sales, expenses and prices will be replaced.'))return;products=d.products;sales=d.sales;expenses=Array.isArray(d.expenses)?d.expenses:[];syncUrl=typeof d.syncUrl==='string'?d.syncUrl:syncUrl;save();renderAll();renderMenu();toast('Backup restored')}catch(err){toast('That backup file is invalid')}e.target.value=''};
+document.getElementById('todayReset').onclick=()=>{document.getElementById('salesDateFilter').value=isoToday();showTab('sales')};
+function renderAll(){renderProducts();renderHome();document.getElementById('salesProductFilter').innerHTML='<option value="">All products</option>'+products.map(p=>`<option>${esc(p.name)}</option>`).join('');if(document.getElementById('expenses').classList.contains('active'))renderExpenses();}
+document.getElementById('syncUrl').value=syncUrl;document.getElementById('syncStatus').textContent=syncUrl?'Sync URL saved on this device.':'Sync not configured';
+renderAll();
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body>
+</html>
